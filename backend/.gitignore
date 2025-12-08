@@ -1,0 +1,7 @@
+# Thư mục chứa tất cả các dependencies của Node.js
+node_modules/
+
+# Bạn cũng nên thêm những thứ khác không cần thiết khác
+# .env
+# npm-debug.log*
+# dist/
