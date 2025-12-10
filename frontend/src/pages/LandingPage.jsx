@@ -56,7 +56,7 @@ const LandingPage = () => {
             )}
           </button>
 
-          {/* Mobile Header */}
+          {/* Header */}
           <div className="hidden md:flex items-center">
             {user ? (
               <ProfileInfoCard />

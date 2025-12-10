@@ -3,6 +3,7 @@ import cors from "cors";
 import "dotenv/config.js";
 import { connectDB } from "./config/db.js";
 import userRouter from "./routes/userRoutes.js";
+import adminRouter from "./routes/adminRoutes.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -26,6 +27,7 @@ app.use(expess.json());
 
 app.use("/api/auth", userRouter);
 app.use("/api/resume", resumeRouter);
+app.use("/api/admin", adminRouter);
 
 app.use(
   '/uploads', 

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { LuMail, LuPhone, LuGithub, LuGlobe } from "react-icons/lu";
-import { RiLinkedinLine } from "react-icons/ri";
+import { Mail, Phone, Github, Globe, Linkedin } from "lucide-react";
 import {
   EducationInfo,
   WorkExperience,
@@ -66,7 +65,7 @@ const TemplateOne = ({ resumeData = {}, colorPalette, containerWidth }) => {
           <div className="flex flex-wrap gap-3 text-sm">
             {contactInfo.email && (
               <div className="flex items-center">
-                <LuMail className="mr-1" />
+                <Mail className="mr-1" />
                 <a
                   href={`mailto:${contactInfo.email}`}
                   className="hover:underline"
@@ -77,7 +76,7 @@ const TemplateOne = ({ resumeData = {}, colorPalette, containerWidth }) => {
             )}
             {contactInfo.phone && (
               <div className="flex items-center">
-                <LuPhone className="mr-1" />
+                <Phone className="mr-1" />
                 <a
                   href={`tel:${contactInfo.phone}`}
                   className="hover:underline"
@@ -96,7 +95,7 @@ const TemplateOne = ({ resumeData = {}, colorPalette, containerWidth }) => {
         <div className="flex flex-col items-end text-sm">
           {contactInfo.linkedin && (
             <div className="flex items-center mb-1">
-              <RiLinkedinLine className="mr-1" />
+              <Linkedin className="mr-1" />
               <a
                 href={contactInfo.linkedin}
                 target="_blank"
@@ -109,7 +108,7 @@ const TemplateOne = ({ resumeData = {}, colorPalette, containerWidth }) => {
           )}
           {contactInfo.github && (
             <div className="flex items-center mb-1">
-              <LuGithub className="mr-1" />
+              <Github className="mr-1" />
               <a
                 href={contactInfo.github}
                 target="_blank"
@@ -122,7 +121,7 @@ const TemplateOne = ({ resumeData = {}, colorPalette, containerWidth }) => {
           )}
           {contactInfo.website && (
             <div className="flex items-center">
-              <LuGlobe className="mr-1" />
+              <Globe className="mr-1" />
               <a
                 href={contactInfo.website}
                 target="_blank"

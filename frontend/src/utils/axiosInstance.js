@@ -28,14 +28,16 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response.status) {
+    if (error.response && error.response.status) {
       if (error.response.status === 401) {
         window.location.href = "/";
       } else if (error.response.status === 500) {
-        console.error("Server Error:");
+        console.error("Server Error:", error.response.data);
       }
-    } else if (error.code === "ERR_CANCELED") {
-      console.error("Request timeout");
+    } else if (error.code === "ERR_CANCELED" || error.code === "ECONNABORTED") {
+      console.error("Request timeout or canceled");
+    } else if (error.code === "ERR_NETWORK" || !error.response) {
+      console.error("Network Error: Could not connect to server. Please check if backend is running.");
     }
     return Promise.reject(error);
   }

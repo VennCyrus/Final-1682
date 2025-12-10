@@ -7,6 +7,7 @@ import { validateEmail } from "@/utils/helper";
 import axiosInstance from "@/utils/axiosInstance";
 import { API_PATHS } from "@/utils/ApiPath";
 import { Input } from "./Inputs";
+import { GoogleLogin } from '@react-oauth/google';
 
 const Register = ({ setCurrentPage }) => {
   const [fullName, setFullName] = useState("");
@@ -45,12 +46,45 @@ const Register = ({ setCurrentPage }) => {
         navigate("/dashboard");
       }
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          "Something went wrong, please try again"
-      );
+      if (error.code === "ERR_NETWORK" || !error.response) {
+        setError("Cannot connect to server. Please check if backend is running on http://localhost:4000");
+      } else if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Something went wrong, please try again");
+      }
+      console.error("Registration error:", error);
     }
   };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setError("");
+      const response = await axiosInstance.post(API_PATHS.AUTH.GOOGLE_LOGIN, {
+        credential: credentialResponse.credential,
+      });
+      const { token } = response.data;
+      if (token) {
+        localStorage.setItem("token", token);
+        updateUser(response.data);
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      if (error.code === "ERR_NETWORK" || !error.response) {
+        setError("Cannot connect to server. Please check if backend is running on http://localhost:4000");
+      } else if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Google registration failed. Please try again.");
+      }
+      console.error("Google registration error:", error);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google registration failed. Please try again.");
+  };
+
   return (
     <div className={styles.signupContainer}>
       <div className={styles.headerWrapper}>
@@ -90,6 +124,26 @@ const Register = ({ setCurrentPage }) => {
         <button type="submit" className={styles.signupSubmit}>
           Create Account
         </button>
+
+        {/* Divider */}
+        <div className="flex items-center my-4">
+          <div className="flex-1 border-t border-gray-300"></div>
+          <span className="px-4 text-sm text-gray-500 font-medium">OR</span>
+          <div className="flex-1 border-t border-gray-300"></div>
+        </div>
+
+        {/* Google Login Button */}
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            useOneTap={false}
+            theme="outline"
+            size="large"
+            text="signup_with"
+            shape="rectangular"
+          />
+        </div>
 
         {/* footer */}
         <p className={styles.switchText}>

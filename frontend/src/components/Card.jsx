@@ -1,9 +1,9 @@
 //Profile info card
 import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { UserContext } from "@/context/UserContext";
 import { cardStyles } from "@/assets/dummystyle";
-import { Award, TrendingUp, Zap, Edit, Trash2, Clock, Check } from "lucide-react";
+import { Award, TrendingUp, Zap, Edit, Trash2, Clock, Check, Shield } from "lucide-react";
 
 export const ProfileInfoCard = () => {
   const navigate = useNavigate();
@@ -25,6 +25,15 @@ export const ProfileInfoCard = () => {
         </div>
 
         <div className={cardStyles.profileName}>{user.name || ""}</div>
+        {user.role === 'admin' && (
+          <Link
+            to="/admin"
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-violet-600 bg-violet-50 rounded-lg hover:bg-violet-100 transition-all mb-2"
+          >
+            <Shield size={14} />
+            Admin
+          </Link>
+        )}
         <button className={cardStyles.logoutButton} onClick={handleLogout}>
           Logout
         </button>

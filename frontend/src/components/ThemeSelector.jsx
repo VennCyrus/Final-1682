@@ -1,12 +1,12 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import {resumeTemplates} from '@/utils/data'
-import { Tabs } from './Tabs'
+import Tabs from './Tabs'
 import { Check } from 'lucide-react'
 import { TemplateCard } from './Card'
 import RenderResume from './RenderResume'
 import { DUMMY_RESUME_DATA } from '../utils/data'
 
-const TAB_DATA = [{labe: 'template'}]
+const TAB_DATA = [{label: 'template'}]
 const ThemeSelector = ({selectedTheme, setSelectedTheme, onClose, resumeData}) => {
 
     const resumRef = useRef(null)
@@ -30,13 +30,22 @@ const ThemeSelector = ({selectedTheme, setSelectedTheme, onClose, resumeData}) =
         setBaseWidth(resumRef.current.offsetWidth)
       }
     }
+
+    useEffect(() => {
+      updateBaseWidth()
+      window.addEventListener('resize', updateBaseWidth)
+      return () => {
+        window.removeEventListener('resize', updateBaseWidth)
+      }
+    }, [])
+
   return (
     
     <div className='max-w-7xl mx-auto px-4'>
       {/* Header */}
         <div className='flex flex-col items-start justify-between sm:flex-row sm:items-center gap-4 mb-8 p-4 sm:p-6 bg-linear-to-r
         from-white to-violet-50 border border-violet-100 rounded-2xl shadow-sm'>
-            <Tabs tabs={TAB_DATA} activeTab={tableValue} onChange={setTabActive}/>
+            <Tabs tabs={TAB_DATA} activeTab={tableValue} onChange={setTableValue}/>
             <button className='w-full sm:w-auto px-4 py-2 bg-violet-100 text-violet-700 font-bold rounded-xl hover:bg-violet-200 transition-all'
             onClick={handleThemeSelection}>
               <Check className='w-5 h-5' /> Apply Changes
@@ -59,7 +68,12 @@ const ThemeSelector = ({selectedTheme, setSelectedTheme, onClose, resumeData}) =
           </div>
           {/*Right Side*/}
           <div className='lg:col-span-3 bg-white rounded-2xl border border-gray-100 p-4 sm:p-6' ref={resumRef}>
-            <RenderResume  templateId={selectedTemplate?.theme || ""} 
+            <RenderResume  template={
+              selectedTemplate?.theme === "01" ? "templateOne" 
+              : selectedTemplate?.theme === "02" ? "templateTwo" 
+              : selectedTemplate?.theme === "03" ? "templateThree" 
+              : "templateOne"
+            } 
             resumeData={resumeData || DUMMY_RESUME_DATA} 
             containerWidth={baseWidth}
             />

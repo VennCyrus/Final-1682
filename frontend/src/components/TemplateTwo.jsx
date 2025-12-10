@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { LuExternalLink, LuGithub } from "react-icons/lu";
+import { ExternalLink, Github } from "lucide-react";
 import { formatYearMonth } from "../utils/helper";
 
 const sectionTitleClass = "text-base font-bold uppercase tracking-wide mb-1 pb-1 border-b border-gray-300";
@@ -140,12 +140,12 @@ const TemplateTwo = ({ resumeData = {}, containerWidth }) => {
                 <div className="flex gap-1 mt-0.5 pt-2 text-[11px]">
                   {proj.github && (
                     <a href={proj.github} className="flex items-center gap-0.5 hover:underline text-blue-600">
-                      <LuGithub size={10} /> GitHub
+                      <Github size={10} /> GitHub
                     </a>
                   )}
                   {proj.liveDemo && (
                     <a href={proj.liveDemo} className="flex items-center gap-0.5 hover:underline text-blue-600">
-                      <LuExternalLink size={10} /> Demo
+                      <ExternalLink size={10} /> Demo
                     </a>
                   )}
                 </div>

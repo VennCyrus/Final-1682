@@ -12,7 +12,21 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
       type: String,
-      required: true,
+      required: function() {
+        return !this.googleId; // Password required only if not Google user
+      },
+    },
+    googleId: {
+      type: String,
+      sparse: true, // Allows multiple null values but enforces uniqueness for non-null values
+    },
+    picture: {
+      type: String,
+    },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
     },
   },
   { timestamps: true }

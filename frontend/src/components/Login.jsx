@@ -7,6 +7,7 @@ import axiosInstance from "@/utils/axiosInstance";
 import { API_PATHS } from "@/utils/ApiPath";
 import { Input } from "./Inputs";
 import { authStyles as styles } from "@/assets/dummystyle";
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = ({ setCurrentPage }) => {
   const [email, setEmail] = useState("");
@@ -45,6 +46,30 @@ const Login = ({ setCurrentPage }) => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setError("");
+      const response = await axiosInstance.post(API_PATHS.AUTH.GOOGLE_LOGIN, {
+        credential: credentialResponse.credential,
+      });
+      const { token } = response.data;
+      if (token) {
+        localStorage.setItem("token", token);
+        updateUser(response.data);
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+          "Google login failed. Please try again."
+      );
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google login failed. Please try again.");
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.headerWrapper}>
@@ -75,6 +100,27 @@ const Login = ({ setCurrentPage }) => {
         <button type="submit" className={styles.submitButton}>
           Login
         </button>
+
+        {/* Divider */}
+        <div className="flex items-center my-4">
+          <div className="flex-1 border-t border-gray-300"></div>
+          <span className="px-4 text-sm text-gray-500 font-medium">OR</span>
+          <div className="flex-1 border-t border-gray-300"></div>
+        </div>
+
+        {/* Google Login Button */}
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            useOneTap={false}
+            theme="outline"
+            size="large"
+            text="signin_with"
+            shape="rectangular"
+          />
+        </div>
+
         <p className={styles.switchText}>
           Don't have an account?{" "}
           <button

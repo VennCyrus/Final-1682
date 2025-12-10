@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import DashboarLayout from "./DashboarLayout";
 import { containerStyles } from "@/assets/dummystyle";
 import { TitleInput } from "./Inputs";
-import { buttonStyles } from "@/assets/dummystyle";
-import { Download, Palette, Trash2 } from "lucide-react";
+import { buttonStyles, statusStyles, iconStyles } from "@/assets/dummystyle";
+import { Download, Palette, Trash2, AlertCircle, ArrowLeft, Save, Loader2, ArrowRight } from "lucide-react";
 import { API_PATHS } from "@/utils/ApiPath";
 import axiosInstance from "@/utils/axiosInstance";
 import toast from "react-hot-toast";
@@ -13,6 +13,9 @@ import html2canvas from "html2canvas";
 import html2pdf from "html2pdf.js";
 import { dataURLtoFile } from "@/utils/helper";
 import StepProgress from "./StepProgress";
+import RenderResume from "./RenderResume";
+import Modal from "./Modal";
+import ThemeSelector from "./ThemeSelector";
 import {
   ProfileInfoForm,
   ContactInfoForm,
@@ -568,46 +571,56 @@ const EditResume = () => {
     try {
       setIsLoading(true);
 
-      const thumbnailElement = thumbnailRef.current;
-      if (!thumbnailElement) {
-        throw new Error("Thumbnail element not found");
-      }
+      // First, update resume details without thumbnail
+      await updateResumeDetails("");
 
-      const fixedThumbnail = fixTailwindColors(thumbnailElement);
+      // Try to generate thumbnail if resumeDownloadRef exists (preview modal is open)
+      const resumeElement = resumeDownloadRef.current;
+      if (resumeElement) {
+        try {
+          const fixedThumbnail = fixTailwindColors(resumeElement);
 
-      const thumbnailCanvas = await html2canvas(fixedThumbnail, {
-        scale: 0.5,
-        backgroundColor: "#FFFFFF",
-        logging: false,
-      });
+          const thumbnailCanvas = await html2canvas(fixedThumbnail, {
+            scale: 0.5,
+            backgroundColor: "#FFFFFF",
+            logging: false,
+          });
 
-      document.body.removeChild(fixedThumbnail);
+          // Remove cloned element if it was added to body
+          if (fixedThumbnail !== resumeElement && fixedThumbnail.parentNode === document.body) {
+            document.body.removeChild(fixedThumbnail);
+          }
 
-      const thumbnailDataUrl = thumbnailCanvas.toDataURL("image/png");
-      const thumbnailFile = dataURLtoFile(
-        thumbnailDataUrl,
-        `thumbnail-${resumeId}.png`
-      );
+          const thumbnailDataUrl = thumbnailCanvas.toDataURL("image/png");
+          const thumbnailFile = dataURLtoFile(
+            thumbnailDataUrl,
+            `thumbnail-${resumeId}.png`
+          );
 
-      const formData = new FormData();
-      formData.append("thumbnail", thumbnailFile);
+          const formData = new FormData();
+          formData.append("thumbnail", thumbnailFile);
 
-      const uploadResponse = await axiosInstance.put(
-        API_PATHS.RESUME.UPLOAD_IMAGE(resumeId),
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
+          const uploadResponse = await axiosInstance.put(
+            API_PATHS.RESUME.UPLOAD_IMAGE(resumeId),
+            formData,
+            {
+              headers: { "Content-Type": "multipart/form-data" },
+            }
+          );
+
+          const { thumbnailLink } = uploadResponse.data;
+          await updateResumeDetails(thumbnailLink);
+        } catch (thumbnailError) {
+          console.warn("Failed to generate thumbnail, continuing without it:", thumbnailError);
+          // Continue without thumbnail
         }
-      );
-
-      const { thumbnailLink } = uploadResponse.data;
-      await updateResumeDetails(thumbnailLink);
+      }
 
       toast.success("Resume Updated Successfully");
       navigate("/dashboard");
     } catch (error) {
       console.error("Error Uploading Images:", error);
-      toast.error("Failed to upload images");
+      toast.error(error.response?.data?.message || "Failed to save resume. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -645,15 +658,18 @@ const EditResume = () => {
   };
 
   const downloadPDF = async () => {
+    // Wait a bit to ensure element is rendered
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const element = resumeDownloadRef.current;
     if (!element) {
-      toast.error("Failed to generate PDF. Please try again.");
+      toast.error("Failed to generate PDF. Please ensure preview is loaded.");
       return;
     }
 
     setIsDownloading(true);
     setDownloadSuccess(false);
-    const toastId = toast.loading("Generating PDFâ€¦");
+    const toastId = toast.loading("Generating PDF...");
 
     const override = document.createElement("style");
     override.id = "__pdf_color_override__";
@@ -667,17 +683,36 @@ const EditResume = () => {
     document.head.appendChild(override);
 
     try {
+      // Ensure filename is a valid string
+      const resumeTitle = resumeData?.title || "Resume";
+      const sanitizedTitle = String(resumeTitle)
+        .replace(/[^a-z0-9\s-]/gi, "_")
+        .replace(/\s+/g, "_")
+        .substring(0, 50) || "Resume";
+      const filename = `${sanitizedTitle}.pdf`;
+
+      // Ensure windowWidth is a valid number
+      const windowWidth = Number(element.scrollWidth) || 800;
+      
+      // Validate filename is a string
+      if (typeof filename !== 'string' || filename.length === 0) {
+        throw new Error("Invalid filename");
+      }
+
+      // Use html2pdf.js wrapper with proper error handling
+      // Ensure all options are properly formatted
       await html2pdf()
         .set({
-          margin: 0,
-          filename: `${resumeData.title.replace(/[^a-z0-9]/gi, "_")}.pdf`,
+          margin: [0, 0, 0, 0],
+          filename: String(filename),
           image: { type: "png", quality: 1.0 },
           html2canvas: {
             scale: 2,
             useCORS: true,
             backgroundColor: "#FFFFFF",
             logging: false,
-            windowWidth: element.scrollWidth,
+            windowWidth: windowWidth,
+            allowTaint: true,
           },
           jsPDF: {
             unit: "mm",
@@ -763,9 +798,97 @@ const EditResume = () => {
             <StepProgress progress={progress} />
             {renderForm()}
             {/*4h/35mins*/}
+            <div className="p-4 sm:p-6">
+              {errorMsg && (
+                <div className={statusStyles.error}>
+                  <AlertCircle size={16} />
+                  {errorMsg}
+                  </div>
+              )}
+              
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                <button className={buttonStyles.back} onClick={goBack} disabled={isLoading}>
+                  <ArrowLeft size={16} />
+                  Back
+                </button>
+
+                <button className={buttonStyles.save} onClick={uploadResumeImages} disabled={isLoading}>
+                  {isLoading ? <Loader2 size={16} className="animate-spin" /> 
+                      : <Save size={16} />}
+                  {isLoading ? "Saving..." : "Save & Exit"}
+                </button>
+
+                <button className={buttonStyles.next} onClick={validateAndNext} disabled={isLoading}>
+                  {currentPage === "additionalInfo" && <Download size={16} />}
+                  {currentPage === "additionalInfo" ? "Preview & Download" : "Next"}
+                  {currentPage === "additionalInfo" && <ArrowRight size={16} className="rotate-180"/>}
+                </button>
+                </div>
+            </div>
+          </div>
+          <div className="hidden lg:block">
+            <div className={containerStyles.previewContainer}>
+              <div className="text-center mb-4">
+                <div className={statusStyles.completionBadge}>
+                  <div className={iconStyles.pulseDot}></div>
+                  <span >Preview - {completionPercentage}% Complete</span>
+                </div>
+              </div>
+
+              <div className=" preview-container relativerelative" ref={previewContainerRef}>
+                <div className={containerStyles.previewInner}>
+                  <RenderResume key={`preview-${resumeData?.template?.theme}`}
+                  templateId={resumeData?.template?.theme || ""}
+                  resumeData={resumeData}
+                  containerWidth={previewWidth}
+                  />
+                </div>
+
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/*MODAL DATA HERE*/}
+      <Modal 
+        isOpen={openThemeSelector} 
+        onClose={() => setOpenThemeSelector(false)}
+        title="Change Theme"
+      >
+        <div className={containerStyles.modalContent}>
+          <ThemeSelector 
+            selectedTheme={resumeData?.template?.theme}
+            setSelectedTheme={updateTheme}
+            onClose={() => setOpenThemeSelector(false)}
+            resumeData={resumeData}
+          />
+        </div>
+      </Modal>
+      <Modal 
+        isOpen={openPreviewModal} 
+        onClose={() => setOpenPreviewModal(false)}
+        title={resumeData.title}
+        showActionBtn
+        actionBtnText={isDownloading ? "Generating..." : downloadSuccess ? "Downloaded!" : "Download PDF"}
+        onActionClick={downloadPDF}
+      >
+        <div className={containerStyles.previewInner} ref={resumeDownloadRef}>
+          <RenderResume
+            template={
+              resumeData.template?.theme === "01" || resumeData.template?.theme === "modern" 
+                ? "templateOne" 
+                : resumeData.template?.theme === "02" 
+                ? "templateTwo" 
+                : resumeData.template?.theme === "03" 
+                ? "templateThree" 
+                : "templateOne"
+            }
+            resumeData={resumeData}
+            containerWidth={previewWidth || 800}
+          />
+        </div>
+      </Modal>
     </DashboarLayout>
   );
 };
