@@ -9,6 +9,7 @@ export const Input = ({
   type = "text",
   placeholder,
   label,
+  autoComplete,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -27,6 +28,7 @@ export const Input = ({
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
           className={styles.inputField}
+          autoComplete={autoComplete}
         />
         {type === "password" && (
           <button type="button" className={styles.toggleButton} onClick={() => setShowPassword(!showPassword)}>

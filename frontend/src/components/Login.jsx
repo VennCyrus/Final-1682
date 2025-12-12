@@ -77,7 +77,7 @@ const Login = ({ setCurrentPage }) => {
         <h3 className={styles.title}>Login</h3>
         <p className={styles.subtitle}>Welcome back to our platform</p>
       </div>
-      <form className={styles.form} onSubmit={handLogin}>
+      <form className={styles.form} onSubmit={handLogin} autoComplete="off">
 
 
         <Input
@@ -86,6 +86,7 @@ const Login = ({ setCurrentPage }) => {
           placeholder="email@example.com"
           label="Email"
           type="email"
+          autoComplete="off"
         />
 
         <Input
@@ -94,6 +95,7 @@ const Login = ({ setCurrentPage }) => {
           placeholder="Min 8 characters"
           label="Password"
           type="password"
+          autoComplete="new-password"
         />
 
         {error && <p className={styles.errorMessage}>{error}</p>}

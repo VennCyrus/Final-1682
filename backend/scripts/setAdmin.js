@@ -52,6 +52,23 @@ const setAdminUsers = async () => {
       } else {
         // Update existing user to admin
         user.role = 'admin';
+        
+        // If password is provided and user doesn't have a password, set it
+        if (adminUser.password && (!user.password || user.password === "")) {
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(adminUser.password, salt);
+          user.password = hashedPassword;
+          console.log(`✓ Password set for ${adminUser.email}`);
+        }
+        
+        // If password is provided and user already has a password, update it
+        if (adminUser.password && user.password && user.password !== "") {
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(adminUser.password, salt);
+          user.password = hashedPassword;
+          console.log(`✓ Password updated for ${adminUser.email}`);
+        }
+        
         await user.save();
         console.log(`✓ User ${adminUser.email} is now an admin!`);
       }
