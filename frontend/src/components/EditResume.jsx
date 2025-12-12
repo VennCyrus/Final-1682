@@ -251,6 +251,10 @@ const EditResume = () => {
               errors.push(
                 `Start and End dates are required in experience ${index + 1}`
               );
+            if (startDate && endDate && startDate > endDate)
+              errors.push(
+                `End date must be after start date in experience ${index + 1}`
+              );
           }
         );
         break;
@@ -265,6 +269,10 @@ const EditResume = () => {
             if (!startDate || !endDate)
               errors.push(
                 `Start and End dates are required in education ${index + 1}`
+              );
+            if (startDate && endDate && startDate > endDate)
+              errors.push(
+                `End date must be after start date in education ${index + 1}`
               );
           }
         );
@@ -816,7 +824,15 @@ const EditResume = () => {
               <div className=" preview-container relativerelative" ref={previewContainerRef}>
                 <div className={containerStyles.previewInner}>
                   <RenderResume key={`preview-${resumeData?.template?.theme}`}
-                  templateId={resumeData?.template?.theme || ""}
+                  template={
+                    resumeData?.template?.theme === "01" || resumeData?.template?.theme === "modern" 
+                      ? "templateOne" 
+                      : resumeData?.template?.theme === "02" 
+                      ? "templateTwo" 
+                      : resumeData?.template?.theme === "03" 
+                      ? "templateThree" 
+                      : "templateOne"
+                  }
                   resumeData={resumeData}
                   containerWidth={previewWidth}
                   />
