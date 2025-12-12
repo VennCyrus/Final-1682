@@ -658,12 +658,9 @@ const EditResume = () => {
   };
 
   const downloadPDF = async () => {
-    // Wait a bit to ensure element is rendered
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
     const element = resumeDownloadRef.current;
     if (!element) {
-      toast.error("Failed to generate PDF. Please ensure preview is loaded.");
+      toast.error("Failed to generate PDF. Please try again.");
       return;
     }
 
@@ -683,36 +680,17 @@ const EditResume = () => {
     document.head.appendChild(override);
 
     try {
-      // Ensure filename is a valid string
-      const resumeTitle = resumeData?.title || "Resume";
-      const sanitizedTitle = String(resumeTitle)
-        .replace(/[^a-z0-9\s-]/gi, "_")
-        .replace(/\s+/g, "_")
-        .substring(0, 50) || "Resume";
-      const filename = `${sanitizedTitle}.pdf`;
-
-      // Ensure windowWidth is a valid number
-      const windowWidth = Number(element.scrollWidth) || 800;
-      
-      // Validate filename is a string
-      if (typeof filename !== 'string' || filename.length === 0) {
-        throw new Error("Invalid filename");
-      }
-
-      // Use html2pdf.js wrapper with proper error handling
-      // Ensure all options are properly formatted
       await html2pdf()
         .set({
-          margin: [0, 0, 0, 0],
-          filename: String(filename),
+          margin: 0,
+          filename: `${resumeData.title.replace(/[^a-z0-9]/gi, "_")}.pdf`,
           image: { type: "png", quality: 1.0 },
           html2canvas: {
             scale: 2,
             useCORS: true,
             backgroundColor: "#FFFFFF",
             logging: false,
-            windowWidth: windowWidth,
-            allowTaint: true,
+            windowWidth: element.scrollWidth,
           },
           jsPDF: {
             unit: "mm",

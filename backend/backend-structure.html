@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cấu trúc Backend - Resume Builder</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #e0e0e0;
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(30, 30, 40, 0.95);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #b0b0b0;
+      margin-bottom: 40px;
+      font-size: 1.1em;
+    }
+
+    .section {
+      background: rgba(40, 40, 55, 0.6);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border-left: 4px solid #667eea;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .section:hover {
+      transform: translateX(5px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    h2 {
+      font-size: 1.8em;
+      margin-bottom: 15px;
+      color: #f093fb;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2::before {
+      content: "📁";
+      font-size: 1.2em;
+    }
+
+    h3 {
+      font-size: 1.3em;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      color: #a78bfa;
+    }
+
+    .file-item {
+      background: rgba(50, 50, 65, 0.5);
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border-left: 3px solid #8b5cf6;
+    }
+
+    .file-name {
+      font-weight: bold;
+      color: #fbbf24;
+      font-family: 'Courier New', monospace;
+      font-size: 1.1em;
+      margin-bottom: 8px;
+    }
+
+    .file-path {
+      color: #60a5fa;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      margin-bottom: 5px;
+    }
+
+    .file-description {
+      color: #d1d5db;
+      margin-top: 8px;
+      line-height: 1.7;
+    }
+
+    .code-block {
+      background: rgba(20, 20, 30, 0.8);
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      color: #34d399;
+      margin: 10px 0;
+      overflow-x: auto;
+      border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .highlight {
+      color: #fbbf24;
+      font-weight: bold;
+    }
+
+    .note {
+      background: rgba(59, 130, 246, 0.2);
+      border-left: 4px solid #3b82f6;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      color: #bfdbfe;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    li {
+      margin: 8px 0;
+      padding-left: 25px;
+      position: relative;
+    }
+
+    li::before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: #8b5cf6;
+      font-weight: bold;
+    }
+
+    .flow-diagram {
+      background: rgba(20, 20, 30, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border: 2px dashed rgba(102, 126, 234, 0.5);
+    }
+
+    .arrow {
+      text-align: center;
+      color: #8b5cf6;
+      font-size: 1.5em;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📚 Cấu trúc Backend - Resume Builder</h1>
+    <p class="subtitle">Giải thích chi tiết từng folder và file trong dự án backend</p>
+
+    <!-- Root Files -->
+    <div class="section">
+      <h2>📄 Root Files (Thư mục gốc)</h2>
+      
+      <div class="file-item">
+        <div class="file-name">server.js</div>
+        <div class="file-path">backend/server.js (dòng 1-50)</div>
+        <div class="file-description">
+          <strong>File khởi động chính của ứng dụng:</strong>
+          <ul>
+            <li>Import Express, CORS, dotenv, kết nối database</li>
+            <li>Import các router: userRouter, adminRouter, resumeRouter</li>
+            <li>Khởi tạo Express app, cấu hình middleware (CORS, JSON parser)</li>
+            <li>Kết nối MongoDB qua <code>connectDB()</code></li>
+            <li>Đăng ký routes: <code>/api/auth</code>, <code>/api/resume</code>, <code>/api/admin</code></li>
+            <li>Cấu hình static folder <code>/uploads</code> để serve ảnh</li>
+            <li>Lắng nghe trên PORT (mặc định 4000)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="file-item">
+        <div class="file-name">package.json</div>
+        <div class="file-path">backend/package.json</div>
+        <div class="file-description">
+          <strong>File cấu hình dự án và dependencies:</strong>
+          <ul>
+            <li><span class="highlight">Dependencies:</span> express, mongoose, jsonwebtoken, bcryptjs, multer, cors, dotenv, google-auth-library</li>
+            <li><span class="highlight">Scripts:</span> <code>npm start</code> chạy nodemon để auto-reload</li>
+            <li><span class="highlight">Type:</span> module (ES6 imports)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Config Folder -->
+    <div class="section">
+      <h2>⚙️ config/</h2>
+      <p class="file-description">Thư mục chứa các file cấu hình hệ thống</p>
+      
+      <div class="file-item">
+        <div class="file-name">db.js</div>
+        <div class="file-path">backend/config/db.js (dòng 1-8)</div>
+        <div class="file-description">
+          <strong>Kết nối MongoDB:</strong>
+          <ul>
+            <li>Hàm <code>connectDB()</code> kết nối tới MongoDB qua <code>MONGO_URL</code> từ .env</li>
+            <li>Sử dụng Mongoose để quản lý kết nối</li>
+            <li>Log thông báo khi kết nối thành công</li>
+            <li>Được gọi trong <code>server.js</code> khi khởi động</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Models Folder -->
+    <div class="section">
+      <h2>🗄️ models/</h2>
+      <p class="file-description">Thư mục định nghĩa Schema và Model cho MongoDB (Mongoose)</p>
+      
+      <div class="file-item">
+        <div class="file-name">userModel.js</div>
+        <div class="file-path">backend/models/userModel.js (dòng 1-35)</div>
+        <div class="file-description">
+          <strong>Schema cho User:</strong>
+          <ul>
+            <li><span class="highlight">name:</span> String, required</li>
+            <li><span class="highlight">email:</span> String, required, unique</li>
+            <li><span class="highlight">password:</span> String, required (chỉ khi không có googleId)</li>
+            <li><span class="highlight">googleId:</span> String, sparse (cho Google OAuth)</li>
+            <li><span class="highlight">picture:</span> String (ảnh đại diện từ Google)</li>
+            <li><span class="highlight">role:</span> enum ['user', 'admin'], default 'user'</li>
+            <li><span class="highlight">timestamps:</span> tự động thêm createdAt, updatedAt</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="file-item">
+        <div class="file-name">resumeModel.js</div>
+        <div class="file-path">backend/models/resumeModel.js (dòng 1-91)</div>
+        <div class="file-description">
+          <strong>Schema cho Resume (CV):</strong>
+          <ul>
+            <li><span class="highlight">userId:</span> ObjectId, ref User, required (liên kết với user)</li>
+            <li><span class="highlight">title:</span> String, required</li>
+            <li><span class="highlight">thumbnailLink:</span> String (link ảnh thumbnail)</li>
+            <li><span class="highlight">template:</span> Object {theme, colorPalette}</li>
+            <li><span class="highlight">profileInfo:</span> Object {profilePreviewUrl, fullName, designation, summary}</li>
+            <li><span class="highlight">contactInfo:</span> Object {email, phone, location, linkedin, github, website}</li>
+            <li><span class="highlight">workExperience:</span> Array [{company, role, startDate, endDate, description}]</li>
+            <li><span class="highlight">education:</span> Array [{degree, institution, startDate, endDate}]</li>
+            <li><span class="highlight">skills:</span> Array [{name, progress}]</li>
+            <li><span class="highlight">projects:</span> Array [{title, description, github, liveDemo}]</li>
+            <li><span class="highlight">certifications:</span> Array [{title, issuer, year}]</li>
+            <li><span class="highlight">languages:</span> Array [{name, progress}]</li>
+            <li><span class="highlight">interests:</span> Array[String]</li>
+            <li><span class="highlight">timestamps:</span> createdAt, updatedAt</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middleware Folder -->
+    <div class="section">
+      <h2>🛡️ middleware/</h2>
+      <p class="file-description">Thư mục chứa các middleware xử lý request trước khi vào controller</p>
+      
+      <div class="file-item">
+        <div class="file-name">authMiddleware.js</div>
+        <div class="file-path">backend/middleware/authMiddleware.js (dòng 1-22)</div>
+        <div class="file-description">
+          <strong>Middleware xác thực JWT Token:</strong>
+          <ul>
+            <li>Hàm <code>protect</code> kiểm tra token từ header <code>Authorization: Bearer &lt;token&gt;</code></li>
+            <li>Verify token bằng <code>jwt.verify()</code> với <code>JWT_SECRET</code></li>
+            <li>Lấy userId từ decoded token, tìm user trong DB</li>
+            <li>Gắn user vào <code>req.user</code> để controller sử dụng</li>
+            <li>Trả 401 nếu không có token hoặc token không hợp lệ</li>
+            <li>Được dùng trong các route cần đăng nhập</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="file-item">
+        <div class="file-name">adminMiddleware.js</div>
+        <div class="file-path">backend/middleware/adminMiddleware.js (dòng 1-22)</div>
+        <div class="file-description">
+          <strong>Middleware kiểm tra quyền Admin:</strong>
+          <ul>
+            <li>Hàm <code>admin</code> kiểm tra <code>req.user.role === 'admin'</code></li>
+            <li>Phải đặt sau <code>protect</code> (vì cần <code>req.user</code>)</li>
+            <li>Trả 403 nếu không phải admin</li>
+            <li>Được dùng cho các route chỉ admin mới truy cập được</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="file-item">
+        <div class="file-name">uploadMiddleware.js</div>
+        <div class="file-path">backend/middleware/uploadMiddleware.js (dòng 1-23)</div>
+        <div class="file-description">
+          <strong>Middleware xử lý upload file (Multer):</strong>
+          <ul>
+            <li>Cấu hình <code>multer.diskStorage</code> lưu file vào folder <code>uploads/</code></li>
+            <li>Đặt tên file: <code>Date.now()-originalname</code> (tránh trùng)</li>
+            <li><code>fileFilter</code> chỉ cho phép: image/jpeg, image/png, image/jpg</li>
+            <li>Export instance multer để dùng trong controller</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controllers Folder -->
+    <div class="section">
+      <h2>🎮 controllers/</h2>
+      <p class="file-description">Thư mục chứa logic xử lý business cho từng module</p>
+      
+      <div class="file-item">
+        <div class="file-name">userController.js</div>
+        <div class="file-path">backend/controllers/userController.js (dòng 1-163)</div>
+        <div class="file-description">
+          <strong>Controller xử lý User/Auth:</strong>
+          <ul>
+            <li><span class="highlight">generateToken(userId):</span> Tạo JWT token với expiresIn 7d</li>
+            <li><span class="highlight">registerUser:</span> Đăng ký user mới (hash password, tạo user, trả token)</li>
+            <li><span class="highlight">loginUser:</span> Đăng nhập (tìm user, verify password bằng bcrypt, trả token)</li>
+            <li><span class="highlight">googleLogin:</span> Xác thực Google OAuth, tạo/update user, trả token</li>
+            <li><span class="highlight">getUserProfile:</span> Lấy thông tin user (dùng <code>protect</code> middleware)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="file-item">
+        <div class="file-name">resumeController.js</div>
+        <div class="file-path">backend/controllers/resumeController.js (dòng 1-201)</div>
+        <div class="file-description">
+          <strong>Controller xử lý Resume (CRUD):</strong>
+          <ul>
+            <li><span class="highlight">createResume:</span> Tạo resume mới với dữ liệu mặc định, gắn userId</li>
+            <li><span class="highlight">getUserResume:</span> Lấy tất cả resume của user hiện tại, sort theo createdAt</li>
+            <li><span class="highlight">getResumeById:</span> Lấy 1 resume theo ID (kiểm tra userId để bảo mật)</li>
+            <li><span class="highlight">updateResume:</span> Tìm resume, merge dữ liệu mới, save</li>
+            <li><span class="highlight">deleteResume:</span> Xóa resume + xóa file thumbnail/profileImage trong uploads/</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="file-item">
+        <div class="file-name">uploadImages.js</div>
+        <div class="file-path">backend/controllers/uploadImages.js (dòng 1-57)</div>
+        <div class="file-description">
+          <strong>Controller xử lý upload ảnh:</strong>
+          <ul>
+            <li><span class="highlight">uploadResumeImages:</span> Upload thumbnail và profileImage</li>
+            <li>Sử dụng multer middleware để nhận file</li>
+            <li>Xóa file cũ nếu có, lưu file mới, cập nhật link vào resume</li>
+            <li>Trả về <code>thumbnailLink</code> và <code>profilePreviewUrl</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="file-item">
+        <div class="file-name">adminController.js</div>
+        <div class="file-path">backend/controllers/adminController.js (dòng 1-71)</div>
+        <div class="file-description">
+          <strong>Controller xử lý Admin Dashboard:</strong>
+          <ul>
+            <li><span class="highlight">getAdminStats:</span> Thống kê tổng quan</li>
+            <li>Đếm tổng users, tổng resumes</li>
+            <li>Aggregate resumes theo ngày (30 ngày gần nhất)</li>
+            <li>Fill missing days với count = 0</li>
+            <li>Trả về data cho biểu đồ dashboard</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Routes Folder -->
+    <div class="section">
+      <h2>🛣️ routes/</h2>
+      <p class="file-description">Thư mục định nghĩa các route và gắn controller tương ứng</p>
+      
+      <div class="file-item">
+        <div class="file-name">userRoutes.js</div>
+        <div class="file-path">backend/routes/userRoutes.js (dòng 1-13)</div>
+        <div class="file-description">
+          <strong>Routes cho Authentication:</strong>
+          <div class="code-block">
+POST   /api/auth/register      → registerUser
+POST   /api/auth/login          → loginUser
+POST   /api/auth/google-login   → googleLogin
+GET    /api/auth/profile        → getUserProfile (protect)
+          </div>
+        </div>
+      </div>
+
+      <div class="file-item">
+        <div class="file-name">resumeRoutes.js</div>
+        <div class="file-path">backend/routes/resumeRoutes.js (dòng 1-24)</div>
+        <div class="file-description">
+          <strong>Routes cho Resume:</strong>
+          <div class="code-block">
+POST   /api/resume              → createResume (protect)
+GET    /api/resume              → getUserResume (protect)
+GET    /api/resume/:id          → getResumeById (protect)
+PUT    /api/resume/:id          → updateResume (protect)
+PUT    /api/resume/:id/upload-images → uploadResumeImages (protect)
+DELETE /api/resume/:id          → deleteResume (protect)
+          </div>
+        </div>
+      </div>
+
+      <div class="file-item">
+        <div class="file-name">adminRoutes.js</div>
+        <div class="file-path">backend/routes/adminRoutes.js (dòng 1-11)</div>
+        <div class="file-description">
+          <strong>Routes cho Admin:</strong>
+          <div class="code-block">
+GET    /api/admin/stats         → getAdminStats (protect, admin)
+          </div>
+          <div class="note">
+            <strong>Lưu ý:</strong> Route này yêu cầu cả <code>protect</code> (đăng nhập) và <code>admin</code> (quyền admin)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts Folder -->
+    <div class="section">
+      <h2>🔧 scripts/</h2>
+      <p class="file-description">Thư mục chứa các script tiện ích, không phải phần của API</p>
+      
+      <div class="file-item">
+        <div class="file-name">setAdmin.js</div>
+        <div class="file-path">backend/scripts/setAdmin.js (dòng 1-72)</div>
+        <div class="file-description">
+          <strong>Script thiết lập user làm admin:</strong>
+          <ul>
+            <li>Kết nối MongoDB</li>
+            <li>Tạo hoặc update user với role = 'admin'</li>
+            <li>Hỗ trợ cả user thường (hash password) và Google user (googleId)</li>
+            <li>Chạy độc lập: <code>node scripts/setAdmin.js</code></li>
+            <li>Dùng để setup admin ban đầu hoặc thêm admin mới</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flow Diagram -->
+    <div class="section">
+      <h2>🔄 Luồng xử lý Request</h2>
+      <div class="flow-diagram">
+        <div style="text-align: center; color: #fbbf24; font-weight: bold; margin-bottom: 15px;">Client Request</div>
+        <div class="arrow">↓</div>
+        <div style="text-align: center; color: #8b5cf6; font-weight: bold;">server.js (Express App)</div>
+        <div class="arrow">↓</div>
+        <div style="text-align: center; color: #60a5fa; font-weight: bold;">routes/ (Định tuyến)</div>
+        <div class="arrow">↓</div>
+        <div style="text-align: center; color: #f093fb; font-weight: bold;">middleware/ (Xác thực, kiểm tra quyền)</div>
+        <div class="arrow">↓</div>
+        <div style="text-align: center; color: #34d399; font-weight: bold;">controllers/ (Logic xử lý)</div>
+        <div class="arrow">↓</div>
+        <div style="text-align: center; color: #fbbf24; font-weight: bold;">models/ (Truy vấn MongoDB)</div>
+        <div class="arrow">↓</div>
+        <div style="text-align: center; color: #f093fb; font-weight: bold;">Response về Client</div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="section">
+      <h2>📋 Tóm tắt</h2>
+      <div class="file-description">
+        <ul>
+          <li><strong>server.js:</strong> Entry point, khởi tạo Express, đăng ký routes</li>
+          <li><strong>config/:</strong> Cấu hình database connection</li>
+          <li><strong>models/:</strong> Định nghĩa Schema MongoDB (User, Resume)</li>
+          <li><strong>middleware/:</strong> Xác thực token, kiểm tra quyền, upload file</li>
+          <li><strong>controllers/:</strong> Logic xử lý business (CRUD, auth, upload, stats)</li>
+          <li><strong>routes/:</strong> Định nghĩa endpoints và gắn controller</li>
+          <li><strong>scripts/:</strong> Utility scripts (setAdmin)</li>
+          <li><strong>uploads/:</strong> Folder lưu file ảnh (tự động tạo khi upload)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top: 40px;">
+      <strong>💡 Lưu ý:</strong> Tất cả các route (trừ register/login) đều cần middleware <code>protect</code> để xác thực token. 
+      Route admin cần thêm middleware <code>admin</code> để kiểm tra quyền.
+    </div>
+  </div>
+</body>
+</html>
+
+
+

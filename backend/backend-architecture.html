@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Tóm tắt luồng hoạt động Backend</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --muted: #94a3b8;
+      --text: #e2e8f0;
+      --accent: #f59e0b;
+      --accent-2: #22d3ee;
+      --border: #1f2937;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Inter", Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 32px;
+      background: radial-gradient(circle at 15% 20%, rgba(245,158,11,0.12), transparent 28%),
+                  radial-gradient(circle at 85% 10%, rgba(34,211,238,0.15), transparent 25%),
+                  var(--bg);
+      color: var(--text);
+    }
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: rgba(17,24,39,0.88);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 28px 32px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+    }
+    h1 {
+      font-size: 26px;
+      margin: 0 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+    h1::before {
+      content: "";
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 18px rgba(245,158,11,0.55);
+    }
+    h2 {
+      font-size: 18px;
+      margin: 20px 0 10px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h2::before {
+      content: "•";
+      color: var(--accent);
+      font-weight: 700;
+    }
+    ul { padding-left: 18px; margin: 8px 0 0; }
+    li { margin-bottom: 6px; color: #dbeafe; }
+    code {
+      background: rgba(148,163,184,0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #f8fafc;
+      border: 1px solid rgba(148,163,184,0.15);
+    }
+    .file { font-weight: 700; color: #e5e7eb; }
+    .note { color: var(--muted); font-size: 14px; }
+    .section {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: linear-gradient(145deg, rgba(17,24,39,0.95), rgba(15,23,42,0.85));
+      box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+    }
+    .grid { display: grid; gap: 14px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Luồng cấu trúc Backend (khởi động server → routes → controllers)</h1>
+    <p class="note">Đường dẫn + số dòng để tra cứu nhanh trong repo <code>backend/</code>.</p>
+
+    <div class="grid">
+      <div class="section">
+        <h2>1) Khởi động server</h2>
+        <ul>
+          <li class="file">server.js (<code>server.js</code>, dòng 1-49): tạo app Express, bật CORS, parse JSON, kết nối DB (<code>connectDB()</code>), đăng ký routes <code>/api/auth</code>, <code>/api/resume</code>, <code>/api/admin</code>, phục vụ static <code>/uploads</code>, lắng nghe PORT (mặc định 4000).</li>
+          <li class="file">Kết nối DB (<code>config/db.js</code>, dòng 1-7): <code>connectDB()</code> dùng <code>mongoose.connect(process.env.MONGO_URL)</code>, log “MongoDB connected successfully”.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>2) Middleware bảo vệ & phân quyền</h2>
+        <ul>
+          <li class="file">authMiddleware (<code>middleware/authMiddleware.js</code>, dòng 1-22): đọc header <code>Authorization: Bearer &lt;token&gt;</code>, verify JWT với <code>JWT_SECRET</code>, gắn <code>req.user</code> (loại bỏ password). Sai/thiếu token trả 401.</li>
+          <li class="file">adminMiddleware (<code>middleware/adminMiddleware.js</code>, dòng 1-21): yêu cầu <code>req.user.role === 'admin'</code>; nếu không trả 403.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>3) Định tuyến</h2>
+        <ul>
+          <li class="file">userRoutes (<code>routes/userRoutes.js</code>, dòng 1-13): <code>/register</code>, <code>/login</code>, <code>/google-login</code> (public); <code>/profile</code> (cần <code>protect</code>).</li>
+          <li class="file">resumeRoutes (<code>routes/resumeRoutes.js</code>, dòng 1-23): tất cả yêu cầu <code>protect</code>; CRUD resume <code>GET/POST/PUT/DELETE /api/resume</code>, xem theo id <code>/api/resume/:id</code>, upload ảnh <code>/api/resume/:id/upload-images</code>.</li>
+          <li class="file">adminRoutes (<code>routes/adminRoutes.js</code>, dòng 1-10): <code>GET /api/admin/stats</code> cần <code>protect</code> + <code>admin</code>.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>4) Controllers chính</h2>
+        <ul>
+          <li class="file">userController (<code>controllers/userController.js</code>, dòng 1-163):
+            <ul>
+              <li><code>registerUser</code> (dòng 15-54): kiểm tra trùng email, bcrypt password, trả token.</li>
+              <li><code>loginUser</code> (dòng 55-81): verify email/password, trả token.</li>
+              <li><code>googleLogin</code> (dòng 83-146): verify Google ID token, gắn role admin nếu email trong danh sách, tạo/cập nhật user, trả token.</li>
+              <li><code>getUserProfile</code> (dòng 148-162): trả thông tin user (ẩn password) từ <code>req.user</code>.</li>
+            </ul>
+          </li>
+          <li class="file">resumeController (<code>controllers/resumeController.js</code>, dòng 1-200):
+            <ul>
+              <li><code>createResume</code> (dòng 5-86): tạo resume mặc định kèm dữ liệu client gửi, gắn <code>userId</code>.</li>
+              <li><code>getUserResume</code> (dòng 88-101): list resume theo <code>req.user._id</code>, sort mới nhất.</li>
+              <li><code>getResumeById</code> (dòng 103-121): tìm resume theo id + user, trả 404 nếu không có.</li>
+              <li><code>updateResume</code> (dòng 123-146): merge <code>req.body</code> vào doc, lưu lại.</li>
+              <li><code>deleteResume</code> (dòng 148-200): xác thực sở hữu, xóa file thumbnail/profile trong <code>uploads</code> nếu tồn tại, xóa doc.</li>
+            </ul>
+          </li>
+          <li class="file">uploadImages (<code>controllers/uploadImages.js</code>): xử lý upload thumbnail/ảnh hồ sơ cho resume khi gọi <code>/api/resume/:id/upload-images</code> (xem file để chi tiết luồng multipart).</li>
+          <li class="file">adminController (<code>controllers/adminController.js</code>, dòng 1-69): <code>getAdminStats</code> đếm tổng user/resume, thống kê resume theo ngày (30 ngày), bù các ngày không có dữ liệu.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>5) Models (Mongoose)</h2>
+        <ul>
+          <li class="file">userModel (<code>models/userModel.js</code>): schema user (name, email, password/GoogleId, role mặc định user, avatar...); dùng bởi auth, middleware.</li>
+          <li class="file">resumeModel (<code>models/resumeModel.js</code>): schema resume chứa <code>userId</code>, <code>title</code>, <code>profileInfo</code>, <code>contactInfo</code>, <code>workExperience</code>, <code>education</code>, <code>skills</code>, <code>projects</code>, <code>certifications</code>, <code>languages</code>, <code>interests</code>, <code>thumbnailLink</code>, <code>completion</code>, timestamps.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>6) Luồng tổng thể</h2>
+        <ul>
+          <li>Server khởi động: <code>server.js</code> → <code>connectDB()</code> → đăng ký middleware CORS/JSON → gắn routers.</li>
+          <li>Auth: client gọi <code>/api/auth/register|login|google-login</code> → trả JWT; <code>/profile</code> đọc user từ token.</li>
+          <li>Resume: mọi request đi qua <code>protect</code> → controllers xử lý CRUD, upload ảnh, xóa file cũ, trả JSON.</li>
+          <li>Admin: request đi qua <code>protect</code> + <code>admin</code> → <code>getAdminStats</code> trả thống kê.</li>
+          <li>Static uploads: <code>/uploads/*</code> phục vụ file ảnh thumbnail/profile đã lưu.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="note">Dựa trên file và số dòng hiện tại; nếu code đổi, số dòng có thể khác.</p>
+  </div>
+</body>
+</html>
+
+
+
+
+
+

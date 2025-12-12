@@ -17,6 +17,7 @@ const Login = ({ setCurrentPage }) => {
   const navigate = useNavigate();
 
   const handLogin = async (e) => {
+    
     e.preventDefault();
     if (!validateEmail(email)) {
       setError("Invalid email address");
