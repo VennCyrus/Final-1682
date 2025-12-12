@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Tóm tắt luồng hoạt động Frontend</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --muted: #94a3b8;
+      --text: #e2e8f0;
+      --accent: #8b5cf6;
+      --accent-2: #22d3ee;
+      --border: #1f2937;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Inter", Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 32px;
+      background: radial-gradient(circle at 10% 20%, rgba(79,70,229,0.15), transparent 25%),
+                  radial-gradient(circle at 90% 10%, rgba(34,211,238,0.18), transparent 25%),
+                  var(--bg);
+      color: var(--text);
+    }
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: rgba(17,24,39,0.85);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 28px 32px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+    }
+    h1 {
+      font-size: 26px;
+      margin: 0 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+    h1::before {
+      content: "";
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 18px rgba(139,92,246,0.6);
+    }
+    h2 {
+      font-size: 18px;
+      margin: 20px 0 10px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h2::before {
+      content: "•";
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+    ul { padding-left: 18px; margin: 8px 0 0; }
+    li { margin-bottom: 6px; color: #dbeafe; }
+    code {
+      background: rgba(148,163,184,0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #f8fafc;
+      border: 1px solid rgba(148,163,184,0.15);
+    }
+    .file { font-weight: 700; color: #e5e7eb; }
+    .note { color: var(--muted); font-size: 14px; }
+    .section {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: linear-gradient(145deg, rgba(17,24,39,0.95), rgba(15,23,42,0.85));
+      box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+    }
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Luồng cấu trúc Frontend (từ khởi động tới các trang chính)</h1>
+    <p class="note">Tất cả đường dẫn và số dòng dùng để đối chiếu nhanh trong repo <code>frontend/</code>.</p>
+
+    <div class="grid">
+      <div class="section">
+        <h2>1) Điểm vào ứng dụng</h2>
+        <ul>
+          <li class="file">main.jsx (<code>src/main.jsx</code>, dòng 1-10): tạo root React, bọc toàn bộ app bằng <code>BrowserRouter</code> để bật routing.</li>
+          <li class="file">App.jsx (<code>src/App.jsx</code>, dòng 1-36): cấu hình Google OAuth provider, bọc <code>UserProvider</code>, khai báo các route chính:
+            <ul>
+              <li><code>/</code> → <code>LandingPage</code></li>
+              <li><code>/dashboard</code> → danh sách CV</li>
+              <li><code>/resume/:resumeId</code> → trang chỉnh sửa CV</li>
+              <li><code>/admin</code> → trang admin</li>
+            </ul>
+            Thêm <code>Toaster</code> để hiển thị toast toàn cục.
+          </li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>2) Quản lý trạng thái đăng nhập</h2>
+        <ul>
+          <li class="file">UserContext (<code>src/context/UserContext.jsx</code>, dòng 1-52): giữ <code>user</code>, <code>loading</code>, và các hàm <code>updateUser</code> (lưu token vào <code>localStorage</code>) &amp; <code>clearUser</code>.</li>
+          <li>Hook <code>useEffect</code> (dòng 17-37) tự gọi API <code>GET_PROFILE</code> nếu có token để lấy thông tin người dùng khi tải trang.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>3) Cấu hình API và interceptor</h2>
+        <ul>
+          <li class="file">ApiPath (<code>src/utils/ApiPath.js</code>, dòng 1-26): khai báo <code>BASE_URL</code> backend (http://localhost:4000) và các endpoint cho auth, resume, admin.</li>
+          <li class="file">axiosInstance (<code>src/utils/axiosInstance.js</code>, dòng 1-46): set <code>baseURL</code>, timeout, headers; interceptor request gắn <code>Authorization: Bearer &lt;token&gt;</code>; interceptor response tự điều hướng về <code>/</code> khi 401.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>4) Trang đích (Landing)</h2>
+        <ul>
+          <li class="file">LandingPage (<code>src/pages/LandingPage.jsx</code>, dòng 17-505): hiển thị hero, CTA “Start build / View Templates”.</li>
+          <li>Logic CTA (dòng 29-35, 137-156): nếu đã đăng nhập → <code>navigate('/dashboard')</code>, ngược lại mở modal đăng nhập/đăng ký.</li>
+          <li>Modal auth (dòng 494-503): render <code>Login</code> hoặc <code>Register</code> theo state <code>currentPage</code>.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>5) Dashboard – danh sách &amp; tạo CV</h2>
+        <ul>
+          <li class="file">Dashboard (<code>src/pages/Dashboard.jsx</code>, dòng 1-283): bọc trong <code>DashboarLayout</code>, tải tất cả resume.</li>
+          <li>Fetch danh sách (dòng 95-114, 115-118): gọi <code>GET /api/resume</code> qua <code>axiosInstance</code>, tính % hoàn thành cho từng resume, lưu vào state.</li>
+          <li>UI: nút tạo mới mở <code>CreateResumeForm</code> trong modal (dòng 237-255); mỗi thẻ resume dùng <code>ResumeSummaryCard</code> có hành động xem (<code>navigate('/resume/:id')</code>) và xóa (dòng 213-233).</li>
+          <li>Xóa resume (dòng 119-132): <code>DELETE /api/resume/:id</code> rồi refresh danh sách.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>6) Trang chỉnh sửa CV</h2>
+        <ul>
+          <li class="file">EditResume (<code>src/components/EditResume.jsx</code>, dòng 1-897):
+            <ul>
+              <li>Load dữ liệu ban đầu (dòng 538-568, 751-756): <code>GET /api/resume/:id</code>, đổ vào state <code>resumeData</code>.</li>
+              <li>Điều hướng các bước (dòng 223-356): validate từng bước, cập nhật tiến độ <code>progress</code>, mở preview khi hoàn tất.</li>
+              <li>Cập nhật dữ liệu (dòng 629-644): <code>PUT /api/resume/:id</code> với <code>resumeData</code> &amp; <code>completionPercentage</code>.</li>
+              <li>Tạo thumbnail &amp; upload (dòng 570-627): render canvas bằng <code>html2canvas</code>, upload qua <code>PUT /api/resume/:id/upload-image</code>, sau đó lưu lại resume.</li>
+              <li>Tải PDF (dòng 660-739): dùng <code>html2pdf</code> để xuất file, xử lý màu sắc và tên file an toàn.</li>
+              <li>Xóa resume (dòng 646-658): gọi <code>DELETE</code> và quay lại dashboard.</li>
+              <li>Preview &amp; chọn theme (dòng 758-892): render <code>RenderResume</code> theo theme, cho phép chọn theme trong modal.</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>7) Một số thành phần hỗ trợ</h2>
+        <ul>
+          <li class="file">RenderResume (<code>src/components/RenderResume.jsx</code>): dựng CV theo template; được dùng cả ở preview dashboard và modal tải PDF.</li>
+          <li class="file">Form*.jsx (<code>src/components/Form.jsx</code> và các form con): từng bước nhập liệu (profile, contact, work, education, skills, projects, certifications, additional info) được <code>renderForm()</code> gọi (dòng 384-488 trong <code>EditResume.jsx</code>).</li>
+          <li class="file">DashboarLayout / Navbar / Modal: khung UI chung, modal chuẩn hóa trải nghiệm mở form và preview.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2>8) Dòng chảy tổng thể</h2>
+        <ul>
+          <li>Khởi động: <code>main.jsx</code> gắn router → <code>App.jsx</code> thiết lập OAuth + UserContext → đăng nhập (Landing) hoặc vào Dashboard.</li>
+          <li>Dashboard: tải danh sách CV qua API, cho phép tạo mới (modal) hoặc chọn một CV để chỉnh sửa.</li>
+          <li>Chỉnh sửa: <code>EditResume</code> tải CV theo <code>resumeId</code>, cho nhập liệu từng bước, lưu/đổi theme, tạo thumbnail, tải PDF.</li>
+          <li>Quản lý xác thực: <code>UserContext</code> tự lấy profile khi có token; interceptor thêm token vào mọi request, đẩy về trang chủ nếu 401.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="note">Dựa trên các file và dòng hiện tại; nếu code thay đổi, số dòng có thể khác.</p>
+  </div>
+</body>
+</html>
+
