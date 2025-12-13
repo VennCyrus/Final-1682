@@ -50,6 +50,10 @@ const Login = ({ setCurrentPage }) => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setError("");
+      if (!credentialResponse?.credential) {
+        setError("Google authentication failed. Please try again.");
+        return;
+      }
       const response = await axiosInstance.post(API_PATHS.AUTH.GOOGLE_LOGIN, {
         credential: credentialResponse.credential,
       });
@@ -58,12 +62,18 @@ const Login = ({ setCurrentPage }) => {
         localStorage.setItem("token", token);
         updateUser(response.data);
         navigate("/dashboard");
+      } else {
+        setError("Google login failed. No token received.");
       }
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          "Google login failed. Please try again."
-      );
+      if (error.code === "ERR_NETWORK" || !error.response) {
+        setError("Cannot connect to server. Please check if backend is running.");
+      } else if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Google login failed. Please try again.");
+      }
+      console.error("Google login error:", error);
     }
   };
 

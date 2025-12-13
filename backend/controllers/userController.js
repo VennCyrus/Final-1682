@@ -94,6 +94,10 @@ export const googleLogin = async (req, res) => {
       return res.status(400).json({ message: "Google credential is required" });
     }
 
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      return res.status(500).json({ message: "Google OAuth not configured" });
+    }
+
     // Verify the Google token
     const ticket = await client.verifyIdToken({
       idToken: credential,
@@ -122,15 +126,19 @@ export const googleLogin = async (req, res) => {
       }
       await user.save();
     } else {
-      // Create new user
-      user = await User.create({
+      // Create new user - don't set password for Google users
+      const userData = {
         name,
         email,
         googleId,
-        picture,
-        password: "", // No password for Google users
         role: isAdmin ? 'admin' : 'user',
-      });
+      };
+      
+      if (picture) {
+        userData.picture = picture;
+      }
+      
+      user = await User.create(userData);
     }
 
     res.status(201).json({

@@ -60,6 +60,10 @@ const Register = ({ setCurrentPage }) => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setError("");
+      if (!credentialResponse?.credential) {
+        setError("Google authentication failed. Please try again.");
+        return;
+      }
       const response = await axiosInstance.post(API_PATHS.AUTH.GOOGLE_LOGIN, {
         credential: credentialResponse.credential,
       });
@@ -68,6 +72,8 @@ const Register = ({ setCurrentPage }) => {
         localStorage.setItem("token", token);
         updateUser(response.data);
         navigate("/dashboard");
+      } else {
+        setError("Google registration failed. No token received.");
       }
     } catch (error) {
       if (error.code === "ERR_NETWORK" || !error.response) {

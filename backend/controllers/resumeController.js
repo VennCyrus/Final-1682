@@ -6,11 +6,17 @@ export const createResume = async (req, res) => {
   try {
     const { title } = req.body;
 
+    if (!title || title.trim() === "") {
+      return res.status(400).json({
+        message: "Resume title is required",
+      });
+    }
+
     // Default resume data structure
     const defaultResumeData = {
       profileInfo: {
         profileImg: null,
-        previewUrl: "",
+        profilePreviewUrl: "",
         fullName: "",
         designation: "",
         summary: "",
@@ -64,7 +70,7 @@ export const createResume = async (req, res) => {
       languages: [
         {
           name: "",
-          progress: "",
+          progress: 0,
         },
       ],
       interests: [""],
